@@ -7,29 +7,231 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f2f2f0;--surface:#fff;--surface2:#f8f8f6;--border:#ebebea;--border2:#e0e0de;--text:#111110;--muted:#888885;--hint:#c0c0bc;--green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;--amber:#d97706;--amber-bg:#fffbeb;--amber-border:#fde68a;--blue:#2563eb;--blue-bg:#eff6ff;--blue-border:#bfdbfe;--red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;--mono:'IBM Plex Mono',monospace;--sans:'Inter',system-ui,sans-serif}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow:hidden}
+.app{display:flex;height:100vh;width:100vw;overflow:hidden}
+.panel{height:100vh;overflow-y:auto;overflow-x:hidden;flex-shrink:0;scrollbar-width:thin;scrollbar-color:#ddd transparent}
+.panel::-webkit-scrollbar{width:3px}.panel::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px}
+.panel-left{width:380px;background:var(--surface);border-right:1px solid var(--border)}
+.panel-mid{flex:1;background:var(--surface2);border-right:1px solid var(--border)}
+.panel-right{width:360px;background:var(--surface)}
+.panel-header{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;background:inherit}
+.panel-title{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text)}
+.panel-sub{font-size:10px;color:var(--hint);font-family:var(--mono);margin-top:2px}
+.hdr-btns{display:flex;gap:6px;align-items:center}
+.btn-live{font-size:11px;font-weight:500;padding:5px 12px;border-radius:6px;border:1px solid var(--green-border);background:var(--green-bg);color:var(--green);cursor:pointer;font-family:var(--sans);transition:all .15s}
+.btn-live:hover{background:#dcfce7}.btn-live.loading{opacity:.6;cursor:wait}
+.section{padding:14px 20px;border-bottom:1px solid var(--border)}
+.section-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--hint);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.metric-grid{display:grid;gap:8px}.cols2{grid-template-columns:1fr 1fr}.cols3{grid-template-columns:repeat(3,1fr)}
+.metric-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.metric-card .m-label{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--hint);margin-bottom:6px}
+.metric-card .m-value{font-size:22px;font-weight:300;font-family:var(--mono);color:var(--text);line-height:1}
+.metric-card .m-sub{font-size:10px;color:var(--hint);font-family:var(--mono);margin-top:4px}
+.metric-card.green .m-value{color:var(--green)}.metric-card.amber .m-value{color:var(--amber)}.metric-card.blue .m-value{color:var(--blue)}.metric-card.red .m-value{color:var(--red)}
+.learn-btn{display:inline-flex;align-items:center;gap:3px;margin-top:6px;font-size:9px;font-weight:500;color:var(--hint);background:none;border:none;cursor:pointer;padding:0;letter-spacing:.5px;text-transform:uppercase;font-family:var(--sans);transition:color .15s}
+.learn-btn:hover{color:var(--muted)}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.bar-lbl{font-size:10px;font-family:var(--mono);color:var(--hint);width:56px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:5px;background:var(--border);border-radius:3px}
+.bar-fill{height:100%;border-radius:3px;min-width:2px;transition:width .5s ease}
+.bar-count{font-size:10px;font-family:var(--mono);color:var(--hint);width:20px;flex-shrink:0}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--hint);padding:0 8px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.data-table td{padding:9px 8px;font-size:11px;border-bottom:1px solid var(--surface2);font-family:var(--mono);color:var(--muted)}
+.data-table td.desc{font-family:var(--sans);font-size:11px;color:var(--text)}
+.data-table tr:hover td{background:var(--surface2)}.data-table tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;font-family:var(--mono)}
+.badge.hot{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.badge.warm{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.stat-box{text-align:center;padding:10px 8px;border-radius:8px;border:1px solid var(--border)}
+.stat-box.green{background:var(--green-bg);border-color:var(--green-border)}
+.stat-box.amber{background:var(--amber-bg);border-color:var(--amber-border)}
+.stat-big{font-size:20px;font-weight:300;font-family:var(--mono)}
+.stat-big.green{color:var(--green)}.stat-big.amber{color:var(--amber)}
+.stat-small{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-top:3px}
+.owner-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.owner-code{font-size:10px;font-family:var(--mono);color:var(--hint);width:30px;text-align:right;flex-shrink:0}
+.owner-track{flex:1;height:4px;background:var(--border);border-radius:2px}
+.owner-fill{height:100%;border-radius:2px;background:var(--green);min-width:2px}
+.owner-count{font-size:10px;font-family:var(--mono);color:var(--hint);width:20px;flex-shrink:0}
+.pills{display:flex;flex-direction:column;gap:6px}
+.pill{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2)}
+.pill.positive{background:var(--green-bg);border-color:var(--green-border)}
+.pill.watch{background:var(--amber-bg);border-color:var(--amber-border)}
+.pill.risk{background:var(--red-bg);border-color:var(--red-border)}
+.pill.opp{background:var(--blue-bg);border-color:var(--blue-border)}
+.pill-tag{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border-radius:4px;flex-shrink:0;margin-top:1px;font-family:var(--sans)}
+.pill.positive .pill-tag{background:var(--green-border);color:#14532d}
+.pill.watch .pill-tag{background:var(--amber-border);color:#78350f}
+.pill.risk .pill-tag{background:var(--red-border);color:#7f1d1d}
+.pill.opp .pill-tag{background:var(--blue-border);color:#1e3a8a}
+.pill-text{font-size:11px;color:var(--muted);line-height:1.55}
+.warn-card{padding:8px 10px;border-radius:6px;font-size:10px;background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber);line-height:1.4;margin-top:8px}
+.alert{margin:8px 20px;padding:8px 12px;border-radius:8px;font-size:11px;border:1px solid var(--amber-border);background:var(--amber-bg);color:var(--amber)}
+.rounding-note{font-size:9px;color:var(--hint);font-family:var(--mono);margin-top:6px}
+.tt-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.tt-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px 26px;max-width:400px;width:90%;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.1)}
+.tt-close{position:absolute;top:12px;right:12px;background:var(--surface2);border:none;color:var(--hint);cursor:pointer;width:24px;height:24px;border-radius:5px;font-size:15px;display:flex;align-items:center;justify-content:center}
+.tt-close:hover{background:var(--border);color:var(--muted)}
+.tt-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px}
+.tt-body{font-size:12px;color:var(--muted);line-height:1.75}
+.tt-body strong{color:var(--text)}
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:12px;color:var(--hint)}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-banner{margin:12px;padding:12px 16px;border-radius:8px;font-size:12px;background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading-state"><div class="spinner"></div><div style="font-size:12px">Loading auction data…</div></div>
+</div>
+<script>
+const TOTAL=410;
+const TIPS={sold:['Sold lots','Lots where the hammer has fallen and reserve was met.'],open:['Open lots','Lots still actively accepting bids.'],closed:['Closed lots','Bidding ended without meeting reserve. May be eligible for post-auction negotiation.'],sold_value:['Total sold value','Sum of all hammer prices across every SOLD lot.'],unsold_closed:['Unsold closed lots','Lots that closed below reserve — sum of their final bids. Best pool for post-auction negotiation.'],open_with_bids:['Open lots with bids','Active lots with at least one bid but not yet at reserve.'],open_no_bids:['Open lots with no bids','Zero bids. Consider reviewing starting price or targeting outreach.'],sold_by_owner:['Sold by owner','Lots sold per consignor. Low sell-through vs others can indicate reserve miscalibration.'],top_sold:['Top sold items','The 8 highest hammer prices.'],reserve_met:['Reserve met','Lots where highest bid meets or exceeds reserve.'],has_bids_not_met:['Has bids, reserve not met','Active bids below reserve — could convert if bidding continues.'],no_bids:['No bids yet','Zero bidding activity. Starting prices may be discouraging participation.'],proximity:['Proximity to reserve','How close the current bid is as % of reserve for lots not yet at reserve.'],closest_table:['Closest to reserve','Open lots with highest bid-to-reserve ratio. Gap = exact amount needed.'],sell_through:['Sell-through rate','% of total lots sold. Benchmark: 60–75%. Lower is normal for first reserve auction.'],engagement:['Bidder engagement','% of lots with at least one bid. High engagement + low sell-through = reserves above market.'],sold_above:['Sold above reserve','Of lots that sold, how many achieved hammer above reserve.'],conversion:['Reserve conversion rate','Primary KPI. Benchmark 60–75% for established auctions; lower expected first time.'],pass_rate:['Reserve pass rate','% of lots that did NOT sell due to reserve.'],median_ratio:['Median hammer/reserve','For sold lots, median ratio of hammer to reserve.'],avg_unsold:['Avg unsold bid vs reserve','For unsold lots with bids, avg bid as % of reserve.'],hot_lots:['Hot lots (≥90% of reserve)','Open lots within 10% of reserve. Most actionable for conversion.'],bucket_chart:['Bid proximity distribution','For open lots with bids, how close current bid is to reserve.'],contested:['Contested lots','Lots where max bid exceeds current high bid — 2+ bidders competing.'],contest_rate:['Contest rate','% of bidded lots with more than one active bidder.'],closed_bids:['Closed lots with bids','Closed below reserve. Best post-auction negotiation pool.'],owner_sell_through:['Owner sell-through','Per consignor, % of their lots sold.']};
 
-:root {
-  --bg: #f2f2f0;
-  --surface: #ffffff;
-  --surface2: #f8f8f6;
-  --border: #ebebea;
-  --border2: #e0e0de;
-  --text: #111110;
-  --muted: #888885;
-  --hint: #c0c0bc;
-  --green: #16a34a;
-  --green-bg: #f0fdf4;
-  --green-border: #bbf7d0;
-  --amber: #d97706;
-  --amber-bg: #fffbeb;
-  --amber-border: #fde68a;
-  --blue: #2563eb;
-  --blue-bg: #eff6ff;
-  --blue-border: #bfdbfe;
-  --red: #dc2626;
-  --red-bg: #fef2f2;
-  --red-border: #fecaca;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'Inter', system-ui, sans-serif;
-}
+function showTip(k){const t=TIPS[k];if(!t)return;document.querySelectorAll('.tt-overlay').forEach(e=>e.remove());const o=document.createElement('div');o.className='tt-overlay';o.onclick=e=>{if(e.target===o)o.remove()};o.innerHTML=`<div class="tt-box"><button class="tt-close" onclick="this.closest('.tt-overlay').remove()">×</button><div class="tt-title">${t[0]}</div><div class="tt-body">${t[1]}</div></div>`;document.body.appendChild(o)}
+function lm(k){return`<button class="learn-btn" onclick="showTip('${k}')">ⓘ learn more</button>`}
+function fmt(n){return Math.round(n).toLocaleString('en-GB')}
+function card(l,v,s,cls,k){return`<div class="metric-card ${cls||''}"><div class="m-label">${l}</div><div class="m-value">${v}</div><div class="m-sub">${s}</div>${k?lm(k):''}</div>`}
+function proc(rows){return{rows,sold:rows.filter(r=>r.status==='SOLD'),closed:rows.filter(r=>r.status==='CLOSED'),open:rows.filter(r=>r.status==='OPEN')}}
+
+function rSales(d){
+  const{sold,closed,open}=d;
+  const sv=sold.reduce((s,r)=>s+r.highBid,0);
+  const cwb=closed.filter(r=>r.highBid>0);
+  const cv=cwb.reduce((s,r)=>s+r.highBid,0);
+  const cnb=closed.filter(r=>r.highBid===0).length;
+  const owb=open.filter(r=>r.highBid>0).length;
+  const onb=open.filter(r=>r.highBid===0).length;
+  const om={};sold.forEach(r=>{om[r.ownerCode]=om[r.ownerCode]||{c:0,v:0};om[r.ownerCode].c++;om[r.ownerCode].v+=r.highBid});
+  const ow=Object.entries(om).sort((a,b)=>b[1].c-a[1].c).slice(0,7);
+  const mx=ow.length?ow[0][1].c:1;
+  const t8=[...sold].sort((a,b)=>b.highBid-a.highBid).slice(0,8);
+  return`<div class="section"><div class="section-label">Lot status</div><div class="metric-grid cols3">${card('Sold',sold.length,(sold.length/TOTAL*100).toFixed(1)+'%','green','sold')}${card('Open',open.length,(open.length/TOTAL*100).toFixed(1)+'%','blue','open')}${card('Closed',closed.length,(closed.length/TOTAL*100).toFixed(1)+'%','amber','closed')}</div></div>
+<div class="section"><div class="section-label">Value</div><div class="metric-grid cols2"><div class="metric-card green"><div class="m-label">Total sold</div><div class="m-value" style="font-size:18px">${fmt(sv)}</div><div class="m-sub">${sold.length} items</div>${lm('sold_value')}</div><div class="metric-card amber"><div class="m-label">Unsold closed</div><div class="m-value" style="font-size:18px">${fmt(cv)}</div><div class="m-sub">${cwb.length} had bids · ${cnb} none</div>${lm('unsold_closed')}</div></div></div>
+<div class="section"><div class="section-label">Open breakdown</div><div class="metric-grid cols2">${card('With bids',owb,'active interest','blue','open_with_bids')}${card('No bids',onb,'needs attention','','open_no_bids')}</div></div>
+<div class="section"><div class="section-label">Sold by owner ${lm('sold_by_owner')}</div>${ow.map(([c,v])=>`<div class="owner-row"><span class="owner-code">${c}</span><div class="owner-track"><div class="owner-fill" style="width:${(v.c/mx*100).toFixed(1)}%"></div></div><span class="owner-count">${v.c}</span></div>`).join('')}</div>
+<div class="section"><div class="section-label">Top lots by value ${lm('top_sold')}</div><table class="data-table"><thead><tr><th>Lot</th><th>Item</th><th>Owner</th><th>Sold</th></tr></thead><tbody>${t8.map(r=>`<tr><td>${r.lot}</td><td class="desc" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.desc}</td><td>${r.ownerCode}</td><td style="color:var(--green)">${fmt(r.highBid)}</td></tr>`).join('')}</tbody></table></div>`}
+
+function rAnalytics(d){
+  const{rows,sold,closed,open}=d;
+  const swr=sold.filter(r=>r.reservePrice>0&&r.highBid>0);
+  const nmo=open.filter(r=>!r.reserveMet&&r.highBid>0&&r.reservePrice>0);
+  const nmc=closed.filter(r=>r.highBid>0&&r.reservePrice>0);
+  const st=(sold.length/TOTAL*100).toFixed(1);
+  const eng=(rows.filter(r=>r.highBid>0).length/TOTAL*100).toFixed(1);
+  const bl=rows.filter(r=>r.highBid>0).length;
+  const rat=swr.map(r=>r.highBid/r.reservePrice).sort((a,b)=>a-b);
+  const med=rat.length?rat[Math.floor(rat.length/2)]:0;
+  const pr=((closed.length+open.filter(r=>r.highBid>0).length)/TOTAL*100).toFixed(1);
+  const sa=swr.filter(r=>r.highBid>r.reservePrice).length;
+  const con=rows.filter(r=>r.maxBid>r.highBid&&r.highBid>0).length;
+  const cr=(con/Math.max(bl,1)*100).toFixed(1);
+  const ub=[...nmo,...nmc];
+  const au=ub.length?(ub.reduce((s,r)=>s+(r.highBid/r.reservePrice),0)/ub.length*100).toFixed(1):0;
+  const gap=nmo.reduce((s,r)=>s+(r.reservePrice-r.highBid),0);
+  const hot=open.filter(r=>r.highBid>0&&r.reservePrice>0&&r.highBid/r.reservePrice>=0.9);
+  const os={};rows.forEach(r=>{if(!os[r.ownerCode])os[r.ownerCode]={t:0,s:0,v:0};os[r.ownerCode].t++;if(r.status==='SOLD'){os[r.ownerCode].s++;os[r.ownerCode].v+=r.highBid}});
+  const ow=Object.entries(os).filter(([,v])=>v.t>2).sort((a,b)=>b[1].s-a[1].s).slice(0,6).map(([k,v])=>({code:k,t:v.t,s:v.s,rate:(v.s/v.t*100).toFixed(0),val:Math.round(v.v)}));
+  const mr=Math.max(...ow.map(o=>parseFloat(o.rate)),1);
+  const bk={'<50':0,'50-60':0,'60-70':0,'70-80':0,'80-90':0,'90-100':0};
+  nmo.forEach(r=>{const p=r.highBid/r.reservePrice*100;if(p>=90)bk['90-100']++;else if(p>=80)bk['80-90']++;else if(p>=70)bk['70-80']++;else if(p>=60)bk['60-70']++;else if(p>=50)bk['50-60']++;else bk['<50']++});
+  const bo=['<50','50-60','60-70','70-80','80-90','90-100'];
+  const bl2={'<50':'< 50%','50-60':'50–60%','60-70':'60–70%','70-80':'70–80%','80-90':'80–90%','90-100':'90–100%'};
+  const bc={'<50':'#e0e0de','50-60':'#93c5fd','60-70':'#60a5fa','70-80':'#fbbf24','80-90':'#f97316','90-100':'#16a34a'};
+  const mb=Math.max(...Object.values(bk),1);
+  return`<div class="section"><div class="section-label">Core performance</div><div class="metric-grid cols3">${card('Sell-through',`<span style="color:var(--green)">${st}%</span>`,sold.length+' of '+TOTAL+' sold','','sell_through')}${card('Engagement',eng+'%',bl+' lots bid on','blue','engagement')}${card('Above reserve',sa,'of '+swr.length+' sold lots','green','sold_above')}</div></div>
+<div class="section"><div class="section-label">Reserve effectiveness <span style="color:var(--amber);font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px">First reserve auction</span></div>
+<div class="metric-grid cols2" style="margin-bottom:10px">
+<div class="metric-card"><div class="m-label">Conversion rate</div><div class="m-value" style="color:var(--green)">${st}%</div><div class="m-sub">Benchmark: 60–75%</div><div class="warn-card">Below benchmark — reserves may be set above market</div>${lm('conversion')}</div>
+<div class="metric-card"><div class="m-label">Pass rate</div><div class="m-value" style="color:var(--amber)">${pr}%</div><div class="m-sub">${TOTAL-sold.length} lots not yet sold</div><div class="warn-card">Expected for first reserve auction</div>${lm('pass_rate')}</div>
+</div>
+<div class="metric-grid cols3">${card('Median ratio',med.toFixed(1)+'x','hammer ÷ reserve','','median_ratio')}${card('Avg unsold bid',au+'%','vs reserve price','amber','avg_unsold')}${card('Hot lots',hot.length,'≥90% of reserve · gap '+fmt(hot.reduce((s,r)=>s+(r.reservePrice-r.highBid),0)),'green','hot_lots')}</div></div>
+<div class="section"><div class="section-label" style="justify-content:space-between"><span>Bid proximity — ${nmo.length} open lots</span>${lm('bucket_chart')}</div>
+<div style="display:grid;grid-template-columns:1fr 130px;gap:16px;align-items:start">
+<div>${bo.map(k=>{const c=bk[k];const w=(c/mb*100).toFixed(1);return`<div class="bar-row"><span class="bar-lbl">${bl2[k]}</span><div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${bc[k]}"></div></div><span class="bar-count">${c}</span></div>`}).join('')}</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div class="stat-box green"><div class="stat-big green">${bk['90-100']+bk['80-90']}</div><div class="stat-small">within 20%</div></div>
+<div class="stat-box amber"><div class="stat-big amber" style="font-size:16px">${fmt(gap)}</div><div class="stat-small">gap to clear</div></div>
+</div></div></div>
+<div class="section"><div class="section-label">Bidder competition</div><div class="metric-grid cols3">${card('Contested',con,'multi-bidder lots','blue','contested')}${card('Contest rate',cr+'%','of lots with bids','blue','contest_rate')}${card('Closed w/ bids',closed.filter(r=>r.highBid>0).length,'ended below reserve','red','closed_bids')}</div></div>
+<div class="section"><div class="section-label" style="justify-content:space-between"><span>Owner sell-through</span>${lm('owner_sell_through')}</div>
+<table class="data-table"><thead><tr><th>Owner</th><th>Rate</th><th>Sold/Total</th><th>Realised</th></tr></thead>
+<tbody>${ow.map(o=>{const w=(parseFloat(o.rate)/mr*100).toFixed(1);return`<tr><td style="font-weight:500;color:var(--text)">${o.code}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:60px;height:4px;background:var(--border);border-radius:2px;flex-shrink:0"><div style="width:${w}%;height:100%;background:var(--green);border-radius:2px"></div></div><span style="color:var(--hint);font-size:10px">${o.rate}%</span></div></td><td>${o.s}/${o.t}</td><td style="color:var(--green)">${fmt(o.val)}</td></tr>`}).join('')}</tbody></table></div>
+<div class="section"><div class="section-label">Observations</div><div class="pills">
+<div class="pill positive"><span class="pill-tag">Positive</span><span class="pill-text">${sa} of ${swr.length} sold lots (${swr.length?Math.round(sa/swr.length*100):0}%) cleared above reserve.</span></div>
+<div class="pill watch"><span class="pill-tag">Watch</span><span class="pill-text">Avg unsold bid at ${au}% of reserve. ${bk['70-80']+bk['80-90']} lots in 70–90% band — consider reserve reductions.</span></div>
+<div class="pill risk"><span class="pill-tag">Risk</span><span class="pill-text">${bk['<50']} open lots below 50% of reserve — ${open.filter(r=>r.highBid===0).length} have zero bids.</span></div>
+<div class="pill opp"><span class="pill-tag">Opportunity</span><span class="pill-text">${hot.length} lots within 10% of reserve. Targeted outreach could convert these before close.</span></div>
+</div></div>`}
+
+function rReserve(d){
+  const{rows,open}=d;
+  const met=rows.filter(r=>r.reserveMet).length;
+  const nb=rows.filter(r=>!r.reserveMet&&r.highBid===0).length;
+  const hb=rows.filter(r=>!r.reserveMet&&r.highBid>0).length;
+  const nm=rows.filter(r=>!r.reserveMet&&r.highBid>0&&r.reservePrice>0).map(r=>({...r,pct:r.highBid/r.reservePrice*100,gap:r.reservePrice-r.highBid}));
+  const bk={'<50':0,'50-60':0,'60-70':0,'70-80':0,'80-90':0,'90-95':0,'95-100':0};
+  nm.forEach(r=>{const p=r.pct;if(p>=95)bk['95-100']++;else if(p>=90)bk['90-95']++;else if(p>=80)bk['80-90']++;else if(p>=70)bk['70-80']++;else if(p>=60)bk['60-70']++;else if(p>=50)bk['50-60']++;else bk['<50']++});
+  const t8=[...nm].sort((a,b)=>b.pct-a.pct).slice(0,8);
+  const mp=(met/TOTAL*100).toFixed(2);
+  const bp=(hb/TOTAL*100).toFixed(2);
+  const np=(nb/TOTAL*100).toFixed(2);
+  const sp=(parseFloat(mp)+parseFloat(bp)+parseFloat(np)).toFixed(2);
+  const mb=Math.max(...Object.values(bk),1);
+  const OR=['95-100','90-95','80-90','70-80','60-70','50-60','<50'];
+  const LB={'95-100':'95–100%','90-95':'90–95%','80-90':'80–90%','70-80':'70–80%','60-70':'60–70%','50-60':'50–60%','<50':'< 50%'};
+  const CL={'95-100':'#16a34a','90-95':'#4ade80','80-90':'#d97706','70-80':'#fbbf24','60-70':'#60a5fa','50-60':'#93c5fd','<50':'#e0e0de'};
+  return`<div class="section"><div class="section-label">Status split</div><div class="metric-grid cols3">${card('Met',mp+'%',met+' of '+TOTAL,'green','reserve_met')}${card('Has bids',bp+'%',hb+' lots','amber','has_bids_not_met')}${card('No bids',np+'%',nb+' lots','','no_bids')}</div><div class="rounding-note">${mp} + ${bp} + ${np} = ${sp}% (rounding)</div></div>
+<div class="section"><div class="section-label" style="justify-content:space-between"><span>Proximity — ${nm.length} items</span>${lm('proximity')}</div>${OR.map(k=>{const c=bk[k];const w=(c/mb*100).toFixed(1);return`<div class="bar-row"><span class="bar-lbl">${LB[k]}</span><div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${CL[k]}"></div></div><span class="bar-count">${c}</span></div>`}).join('')}</div>
+<div class="section"><div class="section-label" style="justify-content:space-between"><span>Closest to reserve</span>${lm('closest_table')}</div>
+<table class="data-table"><thead><tr><th>Lot</th><th>Item</th><th>Bid</th><th>Gap</th><th>%</th></tr></thead>
+<tbody>${t8.map(r=>{const p=r.pct.toFixed(1);return`<tr><td>${r.lot}</td><td class="desc" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.desc}</td><td>${fmt(r.highBid)}</td><td style="color:var(--red)">${fmt(r.gap)}</td><td><span class="badge ${r.pct>=90?'hot':'warm'}">${p}%</span></td></tr>`}).join('')}</tbody></table></div>`}
+
+function buildPanel(id,cls,title,sub,html,onRefresh){
+  const p=document.createElement('div');p.id=id;p.className='panel '+cls;
+  p.innerHTML=`<div class="panel-header"><div><div class="panel-title">${title}</div><div class="panel-sub">${sub}</div></div><div class="hdr-btns"><button class="btn-live" id="${id}-btn">↻ Refresh</button></div></div><div id="${id}-body">${html}</div>`;
+  p.querySelector('#'+id+'-btn').onclick=onRefresh;
+  return p}
+
+let last=null;
+async function fetchData(){
+  const r=await fetch('/api/data');
+  if(!r.ok)throw new Error('API '+r.status);
+  const j=await r.json();
+  if(!j.rows||!j.rows.length)throw new Error('No data');
+  return j}
+
+async function render(first){
+  document.querySelectorAll('.btn-live').forEach(b=>{b.classList.add('loading');b.textContent='↻ Loading…'});
+  try{
+    const j=await fetchData();
+    last=proc(j.rows);
+    const at=new Date(j.fetchedAt).toLocaleTimeString('en-GB');
+    const sub='Sale #2026426 · '+j.count+' rows · '+at;
+    const app=document.getElementById('app');
+    if(first||!document.getElementById('p-sales')){
+      app.innerHTML='';
+      app.appendChild(buildPanel('p-sales','panel-left','Sales',sub,rSales(last),()=>render(false)));
+      app.appendChild(buildPanel('p-analytics','panel-mid','Analytics','Reserve pricing · '+at,rAnalytics(last),()=>render(false)));
+      app.appendChild(buildPanel('p-reserve','panel-right','Reserve',sub,rReserve(last),()=>render(false)));
+    }else{
+      document.getElementById('p-sales-body').innerHTML=rSales(last);
+      document.getElementById('p-analytics-body').innerHTML=rAnalytics(last);
+      document.getElementById('p-reserve-body').innerHTML=rReserve(last);
+      document.querySelectorAll('.panel-sub').forEach(e=>e.textContent=sub);
+    }
+  }catch(e){
+    const app=document.getElementById('app');
+    if(first){app.innerHTML='<div class="error-banner" style="margin:40px auto;max-width:400px">Failed to load: '+e.message+'</div>'}
+    else{document.querySelectorAll('.panel-header').forEach(h=>{if(!h.querySelector('.alert'))h.insertAdjacentHTML('afterend','<div class="alert">Refresh failed: '+e.message+'</div>')})}
+  }finally{
+    document.querySelectorAll('.btn-live').forEach(b=>{b.classList.remove('loading');b.textContent='↻ Refresh'});
+  }}
+render(true);
+</script>
+</body>
+</html>
